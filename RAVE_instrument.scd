@@ -16,7 +16,10 @@ ServerOptions.outDevices; // print all devices, inDevices, outDevices
 s.makeWindow; // record audio
 "hello".postln; // test print
 
+FreqScope.new(400, 200, 0, server: s);
 
+
+s.reboot;
 (
 // microphone and soundin tutorial https://www.youtube.com/watch?v=3vu4UbS2NMw
 s.options.safetyClipThreshold = 1;
@@ -59,7 +62,7 @@ NN.load(\raveWater, "~/Documents/GitHub/RAVE-models/rave-models/water_pondbrain_
 )
 
 // GENERIC SYNTHDEF FOR RAVE MODELS
-var raveDict, raveDictBusIn, raveSynthDefs, raveNNModels, raveBusIn;
+var raveDict, raveDictBusIn, raveSynthDefs, raveNNModels, raveBusIn, nodeDict, freeOtherNodes, createNode;
 
 (
 ~raveDict = Dictionary.new;
@@ -94,10 +97,9 @@ for(0, ~raveSynthDefs.size - 1) { |i|
 ~raveDict.getPairs.postln;
 ~raveDictBusIn.getPairs.postln;
 ~raveSynthDefs.postln;
-)
+
 
 // SYNTH DEFS
-(
 ~raveSynthDefs.do{|name|
 	var synthdefname = "r" ++ name.asString;
 	synthdefname.postln;
@@ -115,35 +117,8 @@ for(0, ~raveSynthDefs.size - 1) { |i|
 		// Out.ar(out, sig); // idk figure this out next based on the
     }).add;
 };
-)
-
-// AUDIO SYNTH DEFS
-(
-SynthDef("audioSend", {
-	Out.ar([
-	30,32,34,36,38,
-	40,42,44,46,48,
-	50,52,54,56,58,
-	60,62,64,66,68,
-	70], SoundIn.ar(0, 1)); // send to RAVE NN
-}).add;
-
-SynthDef("audioInSend", {
-	Out.ar([0, 1,
-	30,32,34,36,38,
-	40,42,44,46,48,
-	50,52,54,56,58,
-	60,62,64,66,68,
-	70], SoundIn.ar(0, 1)); // send to output LR and send to RAVE NN
-}).add;
-
-SynthDef("audioIn", {
-	Out.ar([0, 1], SoundIn.ar(0, 1)); // send to output LR
-}).add;
-)
 
 
-var nodeDict, freeOtherNodes, createNode;
 ~nodeDict = Dictionary.new;
 
 ~freeOtherNodes = {
@@ -179,10 +154,35 @@ var nodeDict, freeOtherNodes, createNode;
 	});
 };
 
+// AUDIO SYNTH DEFS
+SynthDef("audioSend", {
+	Out.ar([
+	30,32,34,36,38,
+	40,42,44,46,48,
+	50,52,54,56,58,
+	60,62,64,66,68,
+	70], SoundIn.ar(0, 1)); // send to RAVE NN
+}).add;
+
+SynthDef("audioInSend", {
+	Out.ar([0, 1,
+	30,32,34,36,38,
+	40,42,44,46,48,
+	50,52,54,56,58,
+	60,62,64,66,68,
+	70], SoundIn.ar(0, 1)); // send to output LR and send to RAVE NN
+}).add;
+
+SynthDef("audioIn", {
+	Out.ar([0, 1], SoundIn.ar(0, 1)); // send to output LR
+}).add;
+
+"FINISHED FUNCTION INIT".postln;
+)
+
 /*
 IRCAM
 https://forum.ircam.fr/projects/detail/rave/
-
 Intelligent Instruments Labs
 https://huggingface.co/Intelligent-Instruments-Lab/rave-models/tree/main
 */
@@ -191,12 +191,12 @@ https://huggingface.co/Intelligent-Instruments-Lab/rave-models/tree/main
 ~createNode.value("audioInSend"); // only one pls
 ~createNode.value("audioSend"); // only one pls
 
-// RAVE ARSENAL
-~createNode.value("rNNPerc");   // percussion, kinda loud output
-~createNode.value("rNNGuitar"); // ..."guitar"
+// RAVE models: real-time machine learning timbre transformation
+~createNode.value("rNNPerc");   // percussion
+~createNode.value("rNNGuitar"); // "guitar"
 ~createNode.value("rNNMagnets"); // physical metallic scrapes
 ~createNode.value("rNNWater");  // bathroomcore
-~createNode.value("rNNVintage"); // fallout old timey
+~createNode.value("rNNVintage"); // fallout old timey music
 ~createNode.value("rNNHumpbacks"); // whales??
 ~createNode.value("rNNMarine"); // ...not whales??
 ~createNode.value("rNNOrgan1"); // worn tape kinda noisy
@@ -212,22 +212,17 @@ https://huggingface.co/Intelligent-Instruments-Lab/rave-models/tree/main
 s.freeAll; // 10 at a time is limit
 
 
-// FREEZER IN THE BACK
+
+// GRAVEYARD
 // Synth.new("rNNSaxophone"); // doesn't seem to work
 // Synth.new("rNNVoice2"); // isn't trained on silence :(
 // Synth.new("rNNResonator"); // doesn't track pitch
 // Synth.new("rNNEnsemble"); // uhhh 18 outputs? o_O? sounds cool tho
 // Synth.new("rNNBirdsMother"); // high hats make it harsh noise
 // Synth.new("rNNBirdsPluma"); // that's not a bird, ouch my ears
-
 // audioIn, audioInSend, audioSend == dry/wet mix 0% to 50/50 to 100% rave
 // voice model works best with tonal noises, techno drums don't do much
 // also lots of high frequency artifacts when pushing the input when clipping
-
-
-
-// GRAVEYARD
-
 
 /*~nodeDict.getPairs.postln;
 ~nodeDict["rNNPerc"].postln;
